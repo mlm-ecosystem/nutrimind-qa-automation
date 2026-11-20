@@ -1,0 +1,151 @@
+name: NutriMind UI tests
+on:
+  push:
+    branches-ignore:
+      - allure-history
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      threads:
+        description: Parallel browser count
+        type: choice
+        default: '2'
+        options:
+          - '1'
+          - '2'
+          - '4'
+permissions:
+  contents: read
+concurrency:
+  group: ui-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+jobs:
+  ui-tests:
+    runs-on: ubuntu-24.04
+    outputs:
+      pages-ready: ${{ steps.public-results-artifact.outcome == 'success' }}
+      public-artifact-id: ${{ steps.public-results-artifact.outputs.artifact-id }}
+      test-run-attempt: ${{ github.run_attempt }}
+    timeout-minutes: 15
+    env:
+      HEADLESS: 'true'
+      TEST_THREADS: ${{ inputs.threads || vars.TEST_THREADS || '2' }}
+      BASE_URL: ${{ vars.BASE_URL || 'https://play.nutrimind.game.nbt.expert/' }}
+      TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+      TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+      TEST_EMAIL2: ${{ secrets.TEST_EMAIL2 }}
+      TEST_PASSWORD2: ${{ secrets.TEST_PASSWORD2 }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Validate credential configuration
+        shell: bash
+        run: |
+          if [ -z "$TEST_EMAIL" ] || [ -z "$TEST_PASSWORD" ]; then
+            echo '::error::Configure TEST_EMAIL and TEST_PASSWORD in repository Actions Secrets.'
+            exit 1
+          fi
+          if { [ -n "$TEST_EMAIL2" ] && [ -z "$TEST_PASSWORD2" ]; } || { [ -z "$TEST_EMAIL2" ] && [ -n "$TEST_PASSWORD2" ]; }; then
+            echo '::error::Configure both TEST_EMAIL2 and TEST_PASSWORD2.'
+            exit 1
+          fi
+      - name: Install Chromium and system dependencies
+        run: mvn -B exec:java -Dexec.args="install --with-deps chromium"
+      - name: Run TestNG suite
+        run: mvn -B test -Dthreads="$TEST_THREADS"
+      - name: Record test attempt
+        if: ${{ always() && hashFiles('target/allure-results/*-result.json') != '' }}
+        run: python3 .github/scripts/record-test-run.py
+      - name: Generate Allure HTML report
+        if: always()
+        run: mvn -B allure:report
+      - name: Upload reports and failure evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: ui-test-results
+          overwrite: true
+          path: |
+            target/surefire-reports/
+            target/artifacts/
+            target/allure-results/
+            target/allure-report/
+          retention-days: 7
+
+      - name: Prepare public Allure results
+        if: ${{ !cancelled() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && hashFiles('target/allure-results/*-result.json') != '' }}
+        id: public-results
+        run: python3 .github/scripts/prepare-pages-results.py
+      - name: Upload public results for archive
+        if: ${{ !cancelled() && steps.public-results.outcome == 'success' }}
+        id: public-results-artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: allure-public-results-${{ github.run_attempt }}
+          path: target/allure-pages-results/
+          retention-days: 7
+
+  deploy-report:
+    needs: ui-tests
+    if: ${{ always() && !cancelled() && needs.ui-tests.outputs.pages-ready == 'true' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      TEST_RUN_ATTEMPT: ${{ needs.ui-tests.outputs.test-run-attempt }}
+    permissions:
+      contents: write
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: allure-github-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - uses: actions/download-artifact@v7
+        with:
+          artifact-ids: ${{ needs.ui-tests.outputs.public-artifact-id }}
+          merge-multiple: true
+          path: target/allure-public-results
+      - name: Restore persistent report archive
+        run: bash .github/scripts/restore-allure-archive.sh
+      - name: Build archive and recover available past reports
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ALLURE_PAGES_URL: ${{ vars.ALLURE_PAGES_URL }}
+        run: |
+          export RUN_CREATED_AT="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --jq .created_at)"
+          python3 .github/scripts/allure_archive.py
+      - name: Save complete report archive
+        run: |
+          git -C target/allure-archive config user.name 'github-actions[bot]'
+          git -C target/allure-archive config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -C target/allure-archive add .
+          if ! git -C target/allure-archive diff --cached --quiet; then
+            git -C target/allure-archive commit -m "Archive Allure run $GITHUB_RUN_ID attempt $TEST_RUN_ATTEMPT"
+            git -C target/allure-archive push origin HEAD:refs/heads/allure-history
+          fi
+      - name: Upload complete Pages archive
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: target/allure-archive
+      - name: Publish Allure to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+      - name: Link report in run summary
+        env:
+          REPORT_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          printf 'Allure — [All runs](%s) · [Latest report](%slatest/)\n' "$REPORT_URL" "$REPORT_URL" >> "$GITHUB_STEP_SUMMARY"
