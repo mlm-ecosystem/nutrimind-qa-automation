@@ -1,6 +1,7 @@
 package expert.nbt.nutrimind.config;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.*;
 import java.util.*;
@@ -16,9 +17,14 @@ public final class TestConfig {
         headless = Boolean.parseBoolean(value(local, "headless", "HEADLESS", "false"));
         timeout = Double.parseDouble(value(local, "timeout", "TEST_TIMEOUT", "15000"));
         if (!Double.isFinite(timeout) || timeout <= 0) throw new IllegalArgumentException("TEST_TIMEOUT must be positive");
-        var configured = new ArrayList<Credentials>();
-        configured.add(new Credentials("primary", value(local, "username", "TEST_EMAIL", ""),
-                value(local, "password", "TEST_PASSWORD", "")));
+        List<Credentials> configured = new ArrayList<>();
+        String email = value(local, "username", "TEST_EMAIL", "");
+        String password = value(local, "password", "TEST_PASSWORD", "");
+        if (email.isBlank() || password.isBlank()) {
+            throw new IllegalStateException("Configure TEST_EMAIL and TEST_PASSWORD in the environment or "
+                    + ".secrets/users.properties; use the project root as the working directory");
+        }
+        configured.add(new Credentials("primary", email, password));
         String email2 = value(local, "user2.email", "TEST_EMAIL2", "");
         String password2 = value(local, "user2.password", "TEST_PASSWORD2", "");
         if (!email2.isBlank() || !password2.isBlank()) {
@@ -30,7 +36,7 @@ public final class TestConfig {
         Properties local = new Properties();
         Path file = Path.of(".secrets", "users.properties");
         if (Files.isRegularFile(file)) {
-            try (var input = Files.newInputStream(file)) { local.load(input); }
+            try (InputStream input = Files.newInputStream(file)) { local.load(input); }
             catch (IOException e) { throw new IllegalStateException("Unable to load local credentials"); }
         }
         return new TestConfig(local);

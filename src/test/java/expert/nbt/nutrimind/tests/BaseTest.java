@@ -63,9 +63,8 @@ public abstract class BaseTest {
             }
         }
     }
-    protected void openUkrainianLogin() {
+    protected void openLogin(String language) {
         login().open();
-        login().selectLanguage("UK");
-        login().expectLoaded();
+        login().selectLanguage(language);
     }
 }

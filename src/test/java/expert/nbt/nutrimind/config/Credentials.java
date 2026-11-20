@@ -1,6 +1,5 @@
 package expert.nbt.nutrimind.config;
 
-/** toString is safe for TestNG/Allure data-provider parameters. */
 public final class Credentials {
     private final String alias;
     private final String username;

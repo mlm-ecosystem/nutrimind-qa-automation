@@ -14,9 +14,7 @@
 | SLF4J + slf4j-simple | 2.0.20 | Logging |
 | GitHub Actions / Pages | — | CI and report hosting |
 
-The tests use OOP, SOLID, and Page Objects. Pages implement the `LoadablePage` contract; browser sessions and 
-artifact collection are separate components, with reporting injected through `ArtifactSink`. Dependency versions 
-are defined in `pom.xml`.
+The tests use Page Objects with an abstract `BasePage`. Pages provide locators, actions, and readiness waits; assertions are defined in `SmokeTest`. Browser sessions and reporting are separate components. Dependency versions are defined in `pom.xml`.
 
 ## Installation and execution
 
@@ -42,7 +40,7 @@ mvn clean test -Dheadless=true
 Run a single test:
 
 ```bash
-mvn test -Dtest=AuthenticationTest#successfulLogin -Dheadless=true
+mvn test -Dtest=SmokeTest#loginWithValidCredentials -Dheadless=true
 ```
 
 ## IntelliJ IDEA
@@ -139,12 +137,6 @@ while complete older reports remain accessible in the archive.
 
 Local runs and runs from other branches or pull requests are not automatically added to this archive.
 Running `mvn clean` locally does not affect the GitHub archive.
-
-Run the framework safety checks:
-
-```bash
-mvn test -Dtest=FrameworkSafetyTest
-```
 
 Run the archive script checks:
 

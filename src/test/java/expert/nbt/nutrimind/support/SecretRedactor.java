@@ -8,7 +8,7 @@ import java.util.*;
 public final class SecretRedactor {
     private final List<String> secrets;
     public SecretRedactor(List<Credentials> users) {
-        var values = new HashSet<String>();
+        Set<String> values = new HashSet<>();
         for (Credentials user : users) {
             for (String value : List.of(user.username(), user.password())) {
                 values.add(value);
