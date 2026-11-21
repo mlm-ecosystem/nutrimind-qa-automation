@@ -2,10 +2,11 @@ package expert.nbt.nutrimind.tests;
 
 import com.microsoft.playwright.APIResponse;
 import expert.nbt.nutrimind.config.Credentials;
-import expert.nbt.nutrimind.pages.GameSelectionPage;
+import expert.nbt.nutrimind.pages.ChooseGameTypePage;
 import expert.nbt.nutrimind.pages.LoginPage;
 import expert.nbt.nutrimind.pages.RecoveryPage;
 import expert.nbt.nutrimind.pages.RegistrationPage;
+import expert.nbt.nutrimind.pages.CreateNewGameSoloPage;
 import io.qameta.allure.*;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
@@ -40,7 +41,7 @@ public final class SmokeTest extends BaseTest {
     @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 2: Переход по ссылке «Правила игры»")
     public void openGameRules(Credentials user) {
         openLogin("EN");
-        GameSelectionPage game = login().login(user);
+        ChooseGameTypePage game = login().login(user);
         try {
             APIResponse response = game.openRules();
             try {
@@ -56,7 +57,7 @@ public final class SmokeTest extends BaseTest {
     @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 3: Авторизация с валидными учетными данными")
     public void loginWithValidCredentials(Credentials user) {
         openLogin("EN");
-        GameSelectionPage game = login().login(user);
+        ChooseGameTypePage game = login().login(user);
         assertThat(game.page()).hasURL(Pattern.compile("^https?://[^/?#]+/step-one(?:\\?.*)?$"));
         assertThat(game.heading()).hasText("Choose a game type");
         assertThat(game.gameOptions()).hasText(new String[]{"Play solo", "Play in a team"});
@@ -85,7 +86,7 @@ public final class SmokeTest extends BaseTest {
     @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 6: Выход из авторизованной сессии")
     public void logoutFromAuthenticatedSession(Credentials user) {
         openLogin("UK");
-        GameSelectionPage game = login().login(user);
+        ChooseGameTypePage game = login().login(user);
         game.openLogoutDialog();
         assertThat(game.logoutDialog()).containsText("Ви впевнені що хочете вийти з системи?");
         LoginPage signedOut = game.confirmLogout();
@@ -115,8 +116,30 @@ public final class SmokeTest extends BaseTest {
 
     @Test(groups = {"smoke", "google"}, description = "Smoke - 9: Авторизация с помощью Google")
     public void loginWithGoogle() {
-        GameSelectionPage game = login().openAuthenticatedGame();
+        ChooseGameTypePage game = login().openAuthenticatedGame();
         assertThat(game.page()).hasURL(Pattern.compile("^https?://[^/?#]+/step-one(?:\\?.*)?$"));
         assertThat(game.heading()).hasText("Choose a game type");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 10: Выбор типа игры ROLE в одиночной игре")
+    public void selectRoleInSoloGame(Credentials user) {
+        openLogin("EN");
+        CreateNewGameSoloPage soloGame = login().login(user).chooseSoloGame();
+        soloGame.selectGameType("ROLE");
+        assertThat(soloGame.page()).hasURL(Pattern.compile("^https?://[^/?#]+/create-game;view=one-player(?:\\?.*)?$"));
+        assertThat(soloGame.selectedButton("ROLE")).hasText("Selected");
+        assertThat(soloGame.createButton()).isEnabled();
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 11: Переключение между типами QUEST и ROLE в одиночной игре")
+    public void switchQuestAndRoleInSoloGame(Credentials user) {
+        openLogin("EN");
+        CreateNewGameSoloPage soloGame = login().login(user).chooseSoloGame();
+        soloGame.selectGameType("QUEST");
+        soloGame.selectGameType("ROLE");
+        soloGame.selectGameType("QUEST");
+        assertThat(soloGame.page()).hasURL(Pattern.compile("^https?://[^/?#]+/create-game;view=one-player(?:\\?.*)?$"));
+        assertThat(soloGame.selectedButton("QUEST")).hasText("Selected");
+        assertThat(soloGame.selectButton("ROLE")).hasText("Select");
     }
 }

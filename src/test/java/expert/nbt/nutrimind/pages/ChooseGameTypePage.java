@@ -8,20 +8,19 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("resource")
-public final class GameSelectionPage extends BasePage {
+public final class ChooseGameTypePage extends BasePage {
     private final Runnable privacy;
     private String language;
     private Page rulesPage;
     private Download rulesDownload;
     private String rulesOrigin;
 
-    public GameSelectionPage(Page page, TestConfig routes, Runnable privacy) {
+    public ChooseGameTypePage(Page page, TestConfig routes, Runnable privacy) {
         super(page, routes); this.privacy = privacy;
     }
     public Locator heading() {
         return page().getByText(Pattern.compile("^(Оберіть тип гри|Choose a game type)$"));
     }
-    // Responsive markup duplicates some labels; only visible options belong to the form.
     public Locator gameOptions() {
         return page().getByText(Pattern.compile("^Play (solo|in a team)$", Pattern.CASE_INSENSITIVE))
                 .filter(new Locator.FilterOptions().setVisible(true));
@@ -43,7 +42,6 @@ public final class GameSelectionPage extends BasePage {
         page().onPopup(onPopup);
         try {
             rulesLink().click();
-            // Playwright events run on the owning thread; no state is shared between tests.
             page().waitForCondition(() -> rulesDownload != null
                     || (rulesPage != page() && !rulesPage.url().equals("about:blank"))
                     || !page().url().equals(rulesOrigin));
@@ -51,8 +49,7 @@ public final class GameSelectionPage extends BasePage {
             if (rulesDownload != null) {
                 rulesDownload.path();
                 contentUrl = rulesDownload.url();
-            }
-            else {
+            } else {
                 rulesPage.waitForLoadState();
                 contentUrl = rulesPage.url();
             }
@@ -72,7 +69,6 @@ public final class GameSelectionPage extends BasePage {
         language = page().getByRole(AriaRole.BUTTON,
                 new Page.GetByRoleOptions().setName(Pattern.compile("^(UK|EN)$", Pattern.CASE_INSENSITIVE)))
                 .innerText().trim().toUpperCase(Locale.ROOT);
-        // The icon-only menu has no useful accessible name; scope its role by visible icon text.
         page().getByRole(AriaRole.BUTTON).filter(new Locator.FilterOptions()
                 .setHas(page().getByText("menu", new Page.GetByTextOptions().setExact(true)))).click();
         page().getByRole(AriaRole.MENUITEM, new Page.GetByRoleOptions()
@@ -85,5 +81,15 @@ public final class GameSelectionPage extends BasePage {
         LoginPage signedOut = new LoginPage(page(), routes(), privacy);
         signedOut.selectLanguage(language);
         return signedOut;
+    }
+    public CreateNewGameSoloPage chooseSoloGame() {
+        page().getByText(Pattern.compile("^Play solo$", Pattern.CASE_INSENSITIVE))
+                .filter(new Locator.FilterOptions().setVisible(true)).locator("xpath=..").click();
+        return ready(new CreateNewGameSoloPage(page(), routes()));
+    }
+    public CreateNewGamePlayInTeamPage chooseTeamGame() {
+        page().getByText(Pattern.compile("^Play in a team$", Pattern.CASE_INSENSITIVE))
+                .filter(new Locator.FilterOptions().setVisible(true)).locator("xpath=..").click();
+        return ready(new CreateNewGamePlayInTeamPage(page(), routes()));
     }
 }

@@ -60,9 +60,9 @@ public final class LoginPage extends BasePage {
         privacy.run();
         email().fill(credentials.username()); password().fill(credentials.password()); submitButton().click();
     }
-    public GameSelectionPage login(Credentials credentials) {
+    public ChooseGameTypePage login(Credentials credentials) {
         submitCredentials(credentials);
-        return ready(new GameSelectionPage(page(), routes(), privacy));
+        return ready(new ChooseGameTypePage(page(), routes(), privacy));
     }
     public RecoveryPage openRecovery() {
         log.info("Opening recovery entry page");
@@ -72,10 +72,10 @@ public final class LoginPage extends BasePage {
         log.info("Opening registration page");
         return ready(new RegistrationPage(page().waitForPopup(() -> registrationLink().click()), routes()));
     }
-    public GameSelectionPage openAuthenticatedGame() {
+    public ChooseGameTypePage openAuthenticatedGame() {
         privacy.run();
         page().navigate(routes().game("step-one"));
-        return ready(new GameSelectionPage(page(), routes(), privacy));
+        return ready(new ChooseGameTypePage(page(), routes(), privacy));
     }
     public void openProtectedRoute() { page().navigate(routes().game("step-one")); }
 }
