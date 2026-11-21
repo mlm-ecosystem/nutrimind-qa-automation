@@ -124,7 +124,7 @@ Configure credentials under **Settings → Secrets and variables → Actions**:
 
 - `TEST_EMAIL` and `TEST_PASSWORD` — primary account (required).
 - `TEST_EMAIL2` and `TEST_PASSWORD2` — secondary account reserved for two-player game tests.
-- `GOOGLE_STORAGE_STATE` and `GOOGLE_SESSION_STORAGE` — Base64-encoded authentication files for Smoke - 9 (configure both together).
+- `GOOGLE_STORAGE_STATE` and `GOOGLE_SESSION_STORAGE` — authentication JSON files for Smoke - 9 (configure both together). The workflow accepts either raw JSON or Base64-encoded JSON.
 
 Use repository variables for optional `BASE_URL` and `ALLURE_PAGES_URL` overrides.
 

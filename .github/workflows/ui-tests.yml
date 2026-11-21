@@ -67,8 +67,27 @@ jobs:
         if: ${{ env.GOOGLE_STORAGE_STATE != '' && env.GOOGLE_SESSION_STORAGE != '' }}
         run: |
           mkdir -p target/auth
-          printf '%s' "$GOOGLE_STORAGE_STATE" | base64 --decode > target/auth/google-storage-state.json
-          printf '%s' "$GOOGLE_SESSION_STORAGE" | base64 --decode > target/auth/google-session-storage.json
+          restore_json_secret() {
+            secret_value="$1"
+            destination="$2"
+            secret_name="$3"
+
+            if printf '%s' "$secret_value" | base64 --decode > "$destination" 2>/dev/null \
+              && python3 -c 'import json, sys; json.load(open(sys.argv[1]))' "$destination"; then
+              return
+            fi
+
+            if printf '%s' "$secret_value" | python3 -c 'import json, sys; json.load(sys.stdin)'; then
+              printf '%s' "$secret_value" > "$destination"
+              return
+            fi
+
+            echo "::error::$secret_name must contain valid Base64-encoded JSON or JSON."
+            exit 1
+          }
+
+          restore_json_secret "$GOOGLE_STORAGE_STATE" target/auth/google-storage-state.json GOOGLE_STORAGE_STATE
+          restore_json_secret "$GOOGLE_SESSION_STORAGE" target/auth/google-session-storage.json GOOGLE_SESSION_STORAGE
       - name: Run TestNG suite
         run: mvn -B test -Dthreads="$TEST_THREADS"
       - name: Record test attempt
