@@ -11,6 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
+import org.testng.SkipException;
 import org.testng.annotations.*;
 
 @Listeners(SecretSanitizingListener.class)
@@ -32,6 +33,10 @@ public abstract class BaseTest {
     public void newSession(Method method, Object[] parameters) {
         TestSession session = new TestSession();
         current.set(session);
+        boolean restoreGoogleAuthentication = Arrays.asList(method.getAnnotation(Test.class).groups()).contains("google");
+        if (restoreGoogleAuthentication && !config.hasGoogleAuthenticationState()) {
+            throw new SkipException("Create the Google authentication state before running Smoke - 9");
+        }
         // Logging out must not invalidate another test using the same account.
         Arrays.stream(parameters).filter(Credentials.class::isInstance).map(Credentials.class::cast)
                 .findFirst().ifPresent(user -> {
@@ -39,7 +44,7 @@ public abstract class BaseTest {
                     session.accountLock.lock();
                 });
         log.info("START {}.{}", getClass().getSimpleName(), method.getName());
-        session.browser = new BrowserSession(config);
+        session.browser = new BrowserSession(config, restoreGoogleAuthentication);
         session.browser.start();
         session.login = new LoginPage(session.browser.newPage(), config, session.browser::protect);
     }

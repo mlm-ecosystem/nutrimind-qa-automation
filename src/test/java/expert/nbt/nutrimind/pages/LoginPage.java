@@ -72,5 +72,10 @@ public final class LoginPage extends BasePage {
         log.info("Opening registration page");
         return ready(new RegistrationPage(page().waitForPopup(() -> registrationLink().click()), routes()));
     }
+    public GameSelectionPage openAuthenticatedGame() {
+        privacy.run();
+        page().navigate(routes().game("step-one"));
+        return ready(new GameSelectionPage(page(), routes(), privacy));
+    }
     public void openProtectedRoute() { page().navigate(routes().game("step-one")); }
 }

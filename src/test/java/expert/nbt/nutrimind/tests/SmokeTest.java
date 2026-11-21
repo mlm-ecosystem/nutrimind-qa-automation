@@ -112,4 +112,11 @@ public final class SmokeTest extends BaseTest {
         assertThat(recovery.heading()).hasText("Запросить сброс пароля");
         assertThat(recovery.formControls()).hasCount(2);
     }
+
+    @Test(groups = {"smoke", "google"}, description = "Smoke - 9: Авторизация с помощью Google")
+    public void loginWithGoogle() {
+        GameSelectionPage game = login().openAuthenticatedGame();
+        assertThat(game.page()).hasURL(Pattern.compile("^https?://[^/?#]+/step-one(?:\\?.*)?$"));
+        assertThat(game.heading()).hasText("Choose a game type");
+    }
 }

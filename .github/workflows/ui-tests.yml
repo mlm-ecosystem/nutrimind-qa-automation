@@ -35,6 +35,10 @@ jobs:
       TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
       TEST_EMAIL2: ${{ secrets.TEST_EMAIL2 }}
       TEST_PASSWORD2: ${{ secrets.TEST_PASSWORD2 }}
+      GOOGLE_STORAGE_STATE: ${{ secrets.GOOGLE_STORAGE_STATE }}
+      GOOGLE_SESSION_STORAGE: ${{ secrets.GOOGLE_SESSION_STORAGE }}
+      GOOGLE_STORAGE_STATE_PATH: target/auth/google-storage-state.json
+      GOOGLE_SESSION_STORAGE_PATH: target/auth/google-session-storage.json
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-java@v5
@@ -53,8 +57,18 @@ jobs:
             echo '::error::Configure both TEST_EMAIL2 and TEST_PASSWORD2.'
             exit 1
           fi
+          if { [ -n "$GOOGLE_STORAGE_STATE" ] && [ -z "$GOOGLE_SESSION_STORAGE" ]; } || { [ -z "$GOOGLE_STORAGE_STATE" ] && [ -n "$GOOGLE_SESSION_STORAGE" ]; }; then
+            echo '::error::Configure both GOOGLE_STORAGE_STATE and GOOGLE_SESSION_STORAGE.'
+            exit 1
+          fi
       - name: Install Chromium and system dependencies
         run: mvn -B exec:java -Dexec.args="install --with-deps chromium"
+      - name: Restore Google authentication state
+        if: ${{ env.GOOGLE_STORAGE_STATE != '' && env.GOOGLE_SESSION_STORAGE != '' }}
+        run: |
+          mkdir -p target/auth
+          printf '%s' "$GOOGLE_STORAGE_STATE" | base64 --decode > target/auth/google-storage-state.json
+          printf '%s' "$GOOGLE_SESSION_STORAGE" | base64 --decode > target/auth/google-session-storage.json
       - name: Run TestNG suite
         run: mvn -B test -Dthreads="$TEST_THREADS"
       - name: Record test attempt

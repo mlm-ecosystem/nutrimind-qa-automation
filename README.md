@@ -57,12 +57,23 @@ The **NutriMind UI** configuration runs tests with a visible browser window.
 
 Provide `TEST_EMAIL` and `TEST_PASSWORD` for the primary account. Add `TEST_EMAIL2` and `TEST_PASSWORD2` 
 together to configure the secondary account for future two-player game tests. Actual values must not be committed.
+Smoke - 9 uses exported Google authentication state rather than entering Google credentials during CI.
 
 Local execution also reads `.secrets/users.properties` using those environment-variable names as property keys. 
 This directory is ignored by Git and the local file has owner-only permissions. Environment variables take precedence 
 over the file. Keep secrets out of Maven command-line arguments.
 
 Optional overrides: `BASE_URL`, `HEADLESS`, and `TEST_TIMEOUT`. Authentication and navigation scenarios use only the primary account.
+
+### One-time Google session export
+
+To create reusable Google authentication files, run:
+
+```bash
+mvn test -Dtest=GoogleAuthenticationStateSetupTest
+```
+
+Chromium opens visibly. Select **Log in with Google**, complete the sign-in manually, and wait for the game-selection page. The utility then saves `.secrets/google-storage-state.json` and `.secrets/google-session-storage.json`. Both files contain session credentials and must never be committed, attached to Allure, or shared.
 
 ## Allure and diagnostics
 
@@ -113,6 +124,7 @@ Configure credentials under **Settings → Secrets and variables → Actions**:
 
 - `TEST_EMAIL` and `TEST_PASSWORD` — primary account (required).
 - `TEST_EMAIL2` and `TEST_PASSWORD2` — secondary account reserved for two-player game tests.
+- `GOOGLE_STORAGE_STATE` and `GOOGLE_SESSION_STORAGE` — Base64-encoded authentication files for Smoke - 9 (configure both together).
 
 Use repository variables for optional `BASE_URL` and `ALLURE_PAGES_URL` overrides.
 

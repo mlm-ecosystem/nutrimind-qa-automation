@@ -11,6 +11,8 @@ public final class TestConfig {
     private final boolean headless;
     private final double timeout;
     private final List<Credentials> users;
+    private final Path googleStorageState;
+    private final String googleSessionStorage;
 
     private TestConfig(Properties local) {
         game = base(value(local, "baseUrl", "BASE_URL", "https://play.nutrimind.game.nbt.expert/"));
@@ -31,6 +33,19 @@ public final class TestConfig {
             configured.add(new Credentials("secondary", email2, password2));
         }
         users = List.copyOf(configured);
+        googleStorageState = Path.of(value(local, "google.storageState", "GOOGLE_STORAGE_STATE_PATH",
+                ".secrets/google-storage-state.json"));
+        Path googleSessionState = Path.of(value(local, "google.sessionStorage", "GOOGLE_SESSION_STORAGE_PATH",
+                ".secrets/google-session-storage.json"));
+        if (Files.isRegularFile(googleStorageState) && Files.isRegularFile(googleSessionState)) {
+            try {
+                googleSessionStorage = Files.readString(googleSessionState);
+            } catch (IOException e) {
+                throw new IllegalStateException("Unable to load Google authentication state");
+            }
+        } else {
+            googleSessionStorage = "";
+        }
     }
     public static TestConfig load() {
         Properties local = new Properties();
@@ -59,4 +74,7 @@ public final class TestConfig {
     public double timeout() { return timeout; }
     public Credentials primary() { return users.get(0); }
     public List<Credentials> users() { return users; }
+    public boolean hasGoogleAuthenticationState() { return !googleSessionStorage.isBlank(); }
+    public Path googleStorageState() { return googleStorageState; }
+    public String googleSessionStorage() { return googleSessionStorage; }
 }

@@ -16,8 +16,12 @@ public final class BrowserSession implements AutoCloseable {
     private BrowserContext context;
     private boolean tracing;
     private boolean sensitive;
+    private final boolean restoreGoogleAuthentication;
 
-    public BrowserSession(TestConfig config) { this.config = config; }
+    public BrowserSession(TestConfig config, boolean restoreGoogleAuthentication) {
+        this.config = config;
+        this.restoreGoogleAuthentication = restoreGoogleAuthentication;
+    }
     public void start() {
         log.info("Starting Chromium (headless={})", config.headless());
         playwright = Playwright.create(new Playwright.CreateOptions().setEnv(Map.of("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")));
@@ -28,13 +32,18 @@ public final class BrowserSession implements AutoCloseable {
     // Ownership of this context and its pages remains with this session.
     @SuppressWarnings("resource")
     public Page newPage() {
-        sensitive = false;
+        sensitive = restoreGoogleAuthentication;
         tracing = false;
-        context = browser.newContext(new Browser.NewContextOptions().setLocale("uk-UA").setViewportSize(1440, 1000));
+        Browser.NewContextOptions options = new Browser.NewContextOptions().setLocale("uk-UA").setViewportSize(1440, 1000);
+        if (restoreGoogleAuthentication) options.setStorageStatePath(config.googleStorageState());
+        context = browser.newContext(options);
         context.setDefaultTimeout(config.timeout());
         context.setDefaultNavigationTimeout(30000);
-        context.tracing().start(new Tracing.StartOptions().setScreenshots(true).setSnapshots(true).setSources(true));
-        tracing = true;
+        if (restoreGoogleAuthentication) restoreGoogleSessionStorage();
+        else {
+            context.tracing().start(new Tracing.StartOptions().setScreenshots(true).setSnapshots(true).setSources(true));
+            tracing = true;
+        }
         Page page = context.newPage();
         page.onResponse(response -> {
             if (response.status() >= 500 && response.request().method().equals("POST")
@@ -43,6 +52,13 @@ public final class BrowserSession implements AutoCloseable {
             }
         });
         return page;
+    }
+    private void restoreGoogleSessionStorage() {
+        String sessionStorage = config.googleSessionStorage().replace("\\", "\\\\").replace("'", "\\'");
+        context.addInitScript("(state => {"
+                + "if (location.hostname.endsWith('nbt.expert')) {"
+                + "for (const [key, value] of Object.entries(JSON.parse(state))) sessionStorage.setItem(key, value);"
+                + "}})('" + sessionStorage + "')");
     }
     public void protect() {
         // Stop recording BEFORE either credential is passed to Playwright.
