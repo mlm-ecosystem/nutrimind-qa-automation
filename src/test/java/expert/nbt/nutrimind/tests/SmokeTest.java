@@ -202,6 +202,7 @@ public final class SmokeTest extends BaseTest {
         teamGame.selectNumberOfPlayers(2);
         EditingRoomPage initialEditingRoom = teamGame.createGame();
         UiAssertions.notBlank(initialEditingRoom.playerName(), "Player name is prefilled after creating the room");
+        initialEditingRoom.enterPlayerName("Player One");
         WaitingForPlayersPage gameRoom = initialEditingRoom.saveEdits();
         UiAssertions.visible(gameRoom.editDataButton(), "Save completes and the Edit data control is displayed");
         EditingRoomPage editingRoom = gameRoom.openEditData();
@@ -219,6 +220,7 @@ public final class SmokeTest extends BaseTest {
         teamGame.enterSecurityCode("1234");
         teamGame.selectNumberOfPlayers(2);
         EditingRoomPage editingRoom = teamGame.createGame();
+        editingRoom.enterPlayerName("Player One");
         WaitingForPlayersPage gameRoom = editingRoom.saveEdits();
         ShareTheGameModal shareModal = gameRoom.openShareTheGame();
         UiAssertions.text(shareModal.title(), "Share the game", "the Share the game modal title is displayed");
@@ -234,6 +236,7 @@ public final class SmokeTest extends BaseTest {
         teamGame.enterSecurityCode("1234");
         teamGame.selectNumberOfPlayers(2);
         EditingRoomPage editingRoom = teamGame.createGame();
+        editingRoom.enterPlayerName("Player One");
         WaitingForPlayersPage gameRoom = editingRoom.saveEdits();
         ShareTheGameModal shareModal = gameRoom.openShareTheGame();
         UiAssertions.visible(shareModal.closeButton(), "the Close button is displayed in the Share the game modal");

@@ -39,6 +39,12 @@ public final class EditingRoomPage extends BasePage {
         playerName().press("Tab");
     }
 
+    public void enterPlayerName(String name) {
+        playerName().fill("");
+        playerName().pressSequentially(name);
+        playerName().press("Tab");
+    }
+
     public WaitingForPlayersPage saveEdits() {
         waitUntilReady();
         saveButton().click();

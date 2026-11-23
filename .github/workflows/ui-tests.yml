@@ -127,6 +127,8 @@ jobs:
     if: ${{ always() && !cancelled() && needs.ui-tests.outputs.pages-ready == 'true' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    outputs:
+      pages-artifact-name: ${{ steps.pages-artifact-name.outputs.name }}
     env:
       TEST_RUN_ATTEMPT: ${{ needs.ui-tests.outputs.test-run-attempt }}
     permissions:
@@ -134,9 +136,6 @@ jobs:
       actions: read
       pages: write
       id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     concurrency:
       group: allure-github-pages
       cancel-in-progress: false
@@ -178,11 +177,23 @@ jobs:
         with:
           name: ${{ steps.pages-artifact-name.outputs.name }}
           path: target/allure-archive
+
+  publish-report:
+    needs: deploy-report
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Publish Allure to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
         with:
-          artifact_name: ${{ steps.pages-artifact-name.outputs.name }}
+          artifact_name: ${{ needs.deploy-report.outputs.pages-artifact-name }}
       - name: Link report in run summary
         env:
           REPORT_URL: ${{ steps.deployment.outputs.page_url }}
