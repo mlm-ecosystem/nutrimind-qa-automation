@@ -23,6 +23,10 @@ public final class CreateNewGamePlayInTeamPage extends BasePage {
                 new Page.GetByRoleOptions().setName("Enter game name").setExact(true));
     }
 
+    public void enterGameName(String name) {
+        gameName().fill(name);
+    }
+
     public Locator createButton() {
         return page().getByRole(com.microsoft.playwright.options.AriaRole.BUTTON,
                 new Page.GetByRoleOptions().setName("Create").setExact(true));

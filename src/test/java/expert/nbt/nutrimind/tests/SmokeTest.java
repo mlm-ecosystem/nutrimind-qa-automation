@@ -152,4 +152,13 @@ public final class SmokeTest extends BaseTest {
         assertThat(teamGame.gameName()).hasAttribute("required", "");
         assertThat(teamGame.createButton()).isDisabled();
     }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 13: Блокирование создания командной игры с названием из пробелов")
+    public void preventCreatingTeamGameWithWhitespaceOnlyName(Credentials user) {
+        openLogin("EN");
+        CreateNewGamePlayInTeamPage teamGame = login().login(user).chooseTeamGame().selectOrganizer();
+        teamGame.enterGameName("   ");
+        assertThat(teamGame.page()).hasURL(Pattern.compile("^https?://[^/?#]+/create-game;view=many-players(?:\\?.*)?$"));
+        assertThat(teamGame.createButton()).isDisabled();
+    }
 }
