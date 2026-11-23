@@ -29,7 +29,7 @@ public final class WaitingForPlayersPage extends BasePage {
     public ShareTheGameModal openShareTheGame() {
         page().getByRole(AriaRole.BUTTON,
                 new Page.GetByRoleOptions().setName("Share the game").setExact(true)).click();
-        return ready(new ShareTheGameModal(page(), routes()));
+        return ready(new ShareTheGameModal(page(), routes(), privacy));
     }
 
     @Override protected void waitForPageContent() {

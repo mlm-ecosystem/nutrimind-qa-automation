@@ -225,4 +225,19 @@ public final class SmokeTest extends BaseTest {
         UiAssertions.visible(shareModal.copyButton(), "the Copy button is displayed in the Share the game modal");
         UiAssertions.visible(shareModal.closeButton(), "the Close button is displayed in the Share the game modal");
     }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 18: Закрытие модального окна Поделиться кнопкой Закрыть")
+    public void closeShareTheGameModal(Credentials user) {
+        openLogin("EN");
+        CreateNewGamePlayInTeamPage teamGame = login().login(user).chooseTeamGame().selectOrganizer();
+        teamGame.enterGameName("Smoke18-" + UUID.randomUUID().toString().substring(0, 8));
+        teamGame.enterSecurityCode("1234");
+        teamGame.selectNumberOfPlayers(2);
+        EditingRoomPage editingRoom = teamGame.createGame();
+        WaitingForPlayersPage gameRoom = editingRoom.saveEdits();
+        ShareTheGameModal shareModal = gameRoom.openShareTheGame();
+        UiAssertions.visible(shareModal.closeButton(), "the Close button is displayed in the Share the game modal");
+        WaitingForPlayersPage waitingForPlayers = shareModal.close();
+        UiAssertions.visible(waitingForPlayers.editDataButton(), "the player waiting page is displayed after closing the modal");
+    }
 }

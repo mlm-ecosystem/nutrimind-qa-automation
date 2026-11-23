@@ -7,8 +7,11 @@ import expert.nbt.nutrimind.config.TestConfig;
 
 @SuppressWarnings("resource")
 public final class ShareTheGameModal extends BasePage {
-    public ShareTheGameModal(Page page, TestConfig routes) {
+    private final Runnable privacy;
+
+    public ShareTheGameModal(Page page, TestConfig routes, Runnable privacy) {
         super(page, routes);
+        this.privacy = privacy;
     }
 
     private Locator dialog() {
@@ -28,6 +31,11 @@ public final class ShareTheGameModal extends BasePage {
     public Locator closeButton() {
         return dialog().getByRole(AriaRole.BUTTON,
                 new Locator.GetByRoleOptions().setName("Close").setExact(true));
+    }
+
+    public WaitingForPlayersPage close() {
+        closeButton().click();
+        return ready(new WaitingForPlayersPage(page(), routes(), privacy));
     }
 
     @Override protected void waitForPageContent() {
