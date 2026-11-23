@@ -7,8 +7,11 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("resource")
 public final class CreateNewGamePlayInTeamPage extends BasePage {
-    public CreateNewGamePlayInTeamPage(Page page, TestConfig routes) {
+    private final Runnable privacy;
+
+    public CreateNewGamePlayInTeamPage(Page page, TestConfig routes, Runnable privacy) {
         super(page, routes);
+        this.privacy = privacy;
     }
 
     public CreateNewGamePlayInTeamPage selectOrganizer() {
@@ -46,9 +49,10 @@ public final class CreateNewGamePlayInTeamPage extends BasePage {
                 new Page.GetByRoleOptions().setName("Create").setExact(true));
     }
 
-    public void createGame() {
+    public WaitingForPlayersPage createGame() {
         createButton().click();
         page().waitForCondition(() -> !page().url().contains("/create-game;view=many-players"));
+        return ready(new WaitingForPlayersPage(page(), routes(), privacy));
     }
 
     @Override public void waitUntilReady() {

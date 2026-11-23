@@ -1,8 +1,11 @@
 package expert.nbt.nutrimind.reporting;
 
 import com.microsoft.playwright.*;
+import com.microsoft.playwright.options.AriaRole;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.util.List;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,13 +21,18 @@ public final class ArtifactCollector {
         if (context == null) return;
         Path directory = root.resolve(testId);
         try {
-            if (failed && !sensitive) {
+            if (failed) {
                 int index = 0;
                 for (Page current : context.pages()) {
                     String name = "page-" + index++;
                     try {
                         if (current.isClosed()) continue;
-                        byte[] screenshot = current.screenshot(new Page.ScreenshotOptions().setFullPage(true));
+                        byte[] screenshot = current.screenshot(new Page.ScreenshotOptions()
+                                .setFullPage(true)
+                                .setMask(List.of(current.locator("input[type='password']"),
+                                        current.getByRole(AriaRole.TEXTBOX, new Page.GetByRoleOptions()
+                                                .setName(Pattern.compile("^E-mail$", Pattern.CASE_INSENSITIVE)))))
+                                .setMaskColor("#000000"));
                         save(directory, name, "image/png", screenshot, ".png");
                         save(directory, name + "-url", "text/plain", current.url().getBytes(StandardCharsets.UTF_8), ".txt");
                     } catch (RuntimeException e) { diagnosticFailure("screenshot", e); }
@@ -34,7 +42,7 @@ public final class ArtifactCollector {
         finally {
             if (tracing) stopTrace(context, failed && !sensitive ? directory : null);
         }
-        if (failed && sensitive) log.info("Private session: screenshots and traces are omitted");
+        if (failed && sensitive) log.info("Private session: masked screenshots are attached; trace is omitted");
     }
     private void stopTrace(BrowserContext context, Path directory) {
         try {

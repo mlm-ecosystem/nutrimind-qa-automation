@@ -8,6 +8,7 @@ import expert.nbt.nutrimind.pages.RecoveryPage;
 import expert.nbt.nutrimind.pages.RegistrationPage;
 import expert.nbt.nutrimind.pages.CreateNewGameSoloPage;
 import expert.nbt.nutrimind.pages.CreateNewGamePlayInTeamPage;
+import expert.nbt.nutrimind.pages.WaitingForPlayersPage;
 import io.qameta.allure.*;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
@@ -171,7 +172,22 @@ public final class SmokeTest extends BaseTest {
         teamGame.enterSecurityCode("1234");
         teamGame.selectNumberOfPlayers(2);
         assertThat(teamGame.securityCode()).hasValue("1234");
-        teamGame.createGame();
-        assertThat(teamGame.page()).hasURL(Pattern.compile("^https?://[^/?#]+/[^?#]*[0-9][^?#]*(?:\\?.*)?$"));
+        WaitingForPlayersPage gameRoom = teamGame.createGame();
+        assertThat(gameRoom.page()).hasURL(Pattern.compile("^https?://[^/?#]+/[^?#]*[0-9][^?#]*(?:\\?.*)?$"));
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 15: Удаление только что созданной командной игры")
+    public void deleteNewTeamGame(Credentials user) {
+        openLogin("EN");
+        CreateNewGamePlayInTeamPage teamGame = login().login(user).chooseTeamGame().selectOrganizer();
+        teamGame.enterGameName("Smoke15-" + UUID.randomUUID().toString().substring(0, 8));
+        teamGame.enterSecurityCode("1234");
+        teamGame.selectNumberOfPlayers(2);
+        assertThat(teamGame.securityCode()).hasValue("1234");
+        WaitingForPlayersPage gameRoom = teamGame.createGame();
+        assertThat(gameRoom.page()).hasURL(Pattern.compile("^https?://[^/?#]+/[^?#]*[0-9][^?#]*(?:\\?.*)?$"));
+        gameRoom.cancelGame();
+        ChooseGameTypePage gameTypes = gameRoom.confirmCancellation();
+        assertThat(gameTypes.heading()).hasText("Choose a game mode");
     }
 }

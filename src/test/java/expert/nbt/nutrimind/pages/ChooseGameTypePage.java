@@ -19,7 +19,7 @@ public final class ChooseGameTypePage extends BasePage {
         super(page, routes); this.privacy = privacy;
     }
     public Locator heading() {
-        return page().getByText(Pattern.compile("^(Оберіть тип гри|Choose a game type)$"));
+        return page().getByText(Pattern.compile("^(Оберіть тип гри|Choose a game (type|mode))$"));
     }
     public Locator gameOptions() {
         return page().getByText(Pattern.compile("^Play (solo|in a team)$", Pattern.CASE_INSENSITIVE))
@@ -90,6 +90,6 @@ public final class ChooseGameTypePage extends BasePage {
     public CreateNewGamePlayInTeamPage chooseTeamGame() {
         page().getByText(Pattern.compile("^Play in a team$", Pattern.CASE_INSENSITIVE))
                 .filter(new Locator.FilterOptions().setVisible(true)).locator("xpath=..").click();
-        return new CreateNewGamePlayInTeamPage(page(), routes());
+        return new CreateNewGamePlayInTeamPage(page(), routes(), privacy);
     }
 }
