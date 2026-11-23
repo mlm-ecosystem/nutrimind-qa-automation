@@ -27,9 +27,28 @@ public final class CreateNewGamePlayInTeamPage extends BasePage {
         gameName().fill(name);
     }
 
+    public Locator securityCode() {
+        return page().getByRole(com.microsoft.playwright.options.AriaRole.TEXTBOX,
+                new Page.GetByRoleOptions().setName("Enter the room password").setExact(true));
+    }
+
+    public void enterSecurityCode(String code) {
+        securityCode().fill(code);
+    }
+
+    public void selectNumberOfPlayers(int count) {
+        page().getByText(Pattern.compile("^" + count + "$"))
+                .filter(new Locator.FilterOptions().setVisible(true)).locator("xpath=../..").click();
+    }
+
     public Locator createButton() {
         return page().getByRole(com.microsoft.playwright.options.AriaRole.BUTTON,
                 new Page.GetByRoleOptions().setName("Create").setExact(true));
+    }
+
+    public void createGame() {
+        createButton().click();
+        page().waitForCondition(() -> !page().url().contains("/create-game;view=many-players"));
     }
 
     @Override public void waitUntilReady() {

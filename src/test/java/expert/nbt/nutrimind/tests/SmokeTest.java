@@ -10,6 +10,7 @@ import expert.nbt.nutrimind.pages.CreateNewGameSoloPage;
 import expert.nbt.nutrimind.pages.CreateNewGamePlayInTeamPage;
 import io.qameta.allure.*;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -160,5 +161,17 @@ public final class SmokeTest extends BaseTest {
         teamGame.enterGameName("   ");
         assertThat(teamGame.page()).hasURL(Pattern.compile("^https?://[^/?#]+/create-game;view=many-players(?:\\?.*)?$"));
         assertThat(teamGame.createButton()).isDisabled();
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 14: Создание защищённой командной игры")
+    public void createProtectedTeamGame(Credentials user) {
+        openLogin("EN");
+        CreateNewGamePlayInTeamPage teamGame = login().login(user).chooseTeamGame().selectOrganizer();
+        teamGame.enterGameName("Smoke14-" + UUID.randomUUID().toString().substring(0, 8));
+        teamGame.enterSecurityCode("1234");
+        teamGame.selectNumberOfPlayers(2);
+        assertThat(teamGame.securityCode()).hasValue("1234");
+        teamGame.createGame();
+        assertThat(teamGame.page()).hasURL(Pattern.compile("^https?://[^/?#]+/[^?#]*[0-9][^?#]*(?:\\?.*)?$"));
     }
 }
