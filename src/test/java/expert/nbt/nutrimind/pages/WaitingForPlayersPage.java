@@ -1,7 +1,7 @@
 package expert.nbt.nutrimind.pages;
 
-import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
 import expert.nbt.nutrimind.config.TestConfig;
 import java.util.regex.Pattern;
 
@@ -14,18 +14,18 @@ public final class WaitingForPlayersPage extends BasePage {
         this.privacy = privacy;
     }
 
-    public void cancelGame() {
-        page().getByText(Pattern.compile("^Cancel$", Pattern.CASE_INSENSITIVE))
-                .filter(new Locator.FilterOptions().setVisible(true)).locator("xpath=..").click();
+    public EditingRoomPage openEditData() {
+        editDataButton().locator("xpath=..")
+                .evaluate("element => element.click()");
+        return ready(new EditingRoomPage(page(), routes(), privacy));
     }
 
-    public ChooseGameTypePage confirmCancellation() {
-        button("Yes").click();
-        return ready(new ChooseGameTypePage(page(), routes(), privacy));
+    public Locator editDataButton() {
+        return page().getByText(Pattern.compile("^Edit(?: data)?$", Pattern.CASE_INSENSITIVE))
+                .filter(new Locator.FilterOptions().setVisible(true));
     }
 
     @Override public void waitUntilReady() {
-        page().getByText(Pattern.compile("^Cancel$", Pattern.CASE_INSENSITIVE))
-                .filter(new Locator.FilterOptions().setVisible(true)).waitFor();
+        editDataButton().waitFor();
     }
 }

@@ -49,10 +49,10 @@ public final class CreateNewGamePlayInTeamPage extends BasePage {
                 new Page.GetByRoleOptions().setName("Create").setExact(true));
     }
 
-    public WaitingForPlayersPage createGame() {
+    public EditingRoomPage createGame() {
         createButton().click();
         page().waitForCondition(() -> !page().url().contains("/create-game;view=many-players"));
-        return ready(new WaitingForPlayersPage(page(), routes(), privacy));
+        return ready(new EditingRoomPage(page(), routes(), privacy));
     }
 
     @Override public void waitUntilReady() {
