@@ -7,6 +7,7 @@ import expert.nbt.nutrimind.pages.LoginPage;
 import expert.nbt.nutrimind.pages.RecoveryPage;
 import expert.nbt.nutrimind.pages.RegistrationPage;
 import expert.nbt.nutrimind.pages.CreateNewGameSoloPage;
+import expert.nbt.nutrimind.pages.CreateNewGamePlayInTeamPage;
 import io.qameta.allure.*;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
@@ -141,5 +142,14 @@ public final class SmokeTest extends BaseTest {
         assertThat(soloGame.page()).hasURL(Pattern.compile("^https?://[^/?#]+/create-game;view=one-player(?:\\?.*)?$"));
         assertThat(soloGame.selectedButton("QUEST")).hasText("Selected");
         assertThat(soloGame.selectButton("ROLE")).hasText("Select");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 12: Блокирование создания командной игры без названия")
+    public void preventCreatingTeamGameWithoutName(Credentials user) {
+        openLogin("EN");
+        CreateNewGamePlayInTeamPage teamGame = login().login(user).chooseTeamGame().selectOrganizer();
+        assertThat(teamGame.page()).hasURL(Pattern.compile("^https?://[^/?#]+/create-game;view=many-players(?:\\?.*)?$"));
+        assertThat(teamGame.gameName()).hasAttribute("required", "");
+        assertThat(teamGame.createButton()).isDisabled();
     }
 }

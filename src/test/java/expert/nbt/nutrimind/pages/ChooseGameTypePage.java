@@ -90,6 +90,6 @@ public final class ChooseGameTypePage extends BasePage {
     public CreateNewGamePlayInTeamPage chooseTeamGame() {
         page().getByText(Pattern.compile("^Play in a team$", Pattern.CASE_INSENSITIVE))
                 .filter(new Locator.FilterOptions().setVisible(true)).locator("xpath=..").click();
-        return ready(new CreateNewGamePlayInTeamPage(page(), routes()));
+        return new CreateNewGamePlayInTeamPage(page(), routes());
     }
 }
