@@ -23,7 +23,7 @@ public final class CreateNewGameSoloPage extends BasePage {
                 new Locator.GetByRoleOptions().setName("Select").setExact(true));
     }
     public Locator createButton() { return button("Create"); }
-    @Override public void waitUntilReady() {
+    @Override protected void waitForPageContent() {
         page().getByText(Pattern.compile("^QUEST$", Pattern.CASE_INSENSITIVE)).waitFor();
     }
     public void selectGameType(String type) { selectButton(type).click(); }

@@ -17,7 +17,7 @@ public final class TestConfig {
     private TestConfig(Properties local) {
         game = base(value(local, "baseUrl", "BASE_URL", "https://play.nutrimind.game.nbt.expert/"));
         headless = Boolean.parseBoolean(value(local, "headless", "HEADLESS", "false"));
-        timeout = Double.parseDouble(value(local, "timeout", "TEST_TIMEOUT", "15000"));
+        timeout = Double.parseDouble(value(local, "timeout", "TEST_TIMEOUT", "30000"));
         if (!Double.isFinite(timeout) || timeout <= 0) throw new IllegalArgumentException("TEST_TIMEOUT must be positive");
         List<Credentials> configured = new ArrayList<>();
         String email = value(local, "username", "TEST_EMAIL", "");

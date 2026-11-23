@@ -55,7 +55,7 @@ public final class CreateNewGamePlayInTeamPage extends BasePage {
         return ready(new EditingRoomPage(page(), routes(), privacy));
     }
 
-    @Override public void waitUntilReady() {
+    @Override protected void waitForPageContent() {
         page().getByText(Pattern.compile("^Game creation$", Pattern.CASE_INSENSITIVE)).waitFor();
     }
 }

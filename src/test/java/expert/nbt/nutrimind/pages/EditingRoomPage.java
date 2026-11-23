@@ -29,19 +29,24 @@ public final class EditingRoomPage extends BasePage {
                 new Page.GetByRoleOptions().setName("Save").setExact(true));
     }
 
+    private Locator cancelButton() {
+        return page().getByText(Pattern.compile("^Cancel$", Pattern.CASE_INSENSITIVE))
+                .filter(new Locator.FilterOptions().setVisible(true));
+    }
+
     public void clearPlayerName() {
         playerName().fill("");
         playerName().press("Tab");
     }
 
     public WaitingForPlayersPage saveEdits() {
+        waitUntilReady();
         saveButton().click();
         return new WaitingForPlayersPage(page(), routes(), privacy);
     }
 
     public void cancelGame() {
-        page().getByText(Pattern.compile("^Cancel$", Pattern.CASE_INSENSITIVE))
-                .filter(new Locator.FilterOptions().setVisible(true)).locator("xpath=..").click();
+        cancelButton().locator("xpath=..").click();
     }
 
     public ChooseGameTypePage confirmCancellation() {
@@ -49,7 +54,12 @@ public final class EditingRoomPage extends BasePage {
         return ready(new ChooseGameTypePage(page(), routes(), privacy));
     }
 
-    @Override public void waitUntilReady() {
+    @Override protected void waitForPageContent() {
+        page().getByText(Pattern.compile("^Editing a room$", Pattern.CASE_INSENSITIVE))
+                .filter(new Locator.FilterOptions().setVisible(true)).waitFor();
         playerName().waitFor();
+        cancelButton().waitFor();
+        saveButton().waitFor();
+        page().waitForCondition(() -> !playerName().inputValue().isBlank() && saveButton().isEnabled());
     }
 }

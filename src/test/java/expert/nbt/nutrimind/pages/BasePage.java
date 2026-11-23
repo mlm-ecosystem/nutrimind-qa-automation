@@ -3,6 +3,7 @@ package expert.nbt.nutrimind.pages;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
+import com.microsoft.playwright.options.LoadState;
 import expert.nbt.nutrimind.config.TestConfig;
 
 public abstract class BasePage {
@@ -18,9 +19,21 @@ public abstract class BasePage {
     protected final Locator link(String name) {
         return browserPage.getByRole(AriaRole.LINK, new Page.GetByRoleOptions().setName(name).setExact(true));
     }
+
+    protected final void waitForPageLoad() {
+        browserPage.waitForLoadState(LoadState.DOMCONTENTLOADED);
+        browserPage.waitForLoadState(LoadState.NETWORKIDLE);
+    }
+
     protected final <T extends BasePage> T ready(T destination) {
         destination.waitUntilReady();
         return destination;
     }
-    public abstract void waitUntilReady();
+
+    public final void waitUntilReady() {
+        waitForPageLoad();
+        waitForPageContent();
+    }
+
+    protected abstract void waitForPageContent();
 }

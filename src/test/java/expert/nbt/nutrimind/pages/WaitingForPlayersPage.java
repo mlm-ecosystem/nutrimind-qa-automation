@@ -2,6 +2,7 @@ package expert.nbt.nutrimind.pages;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.AriaRole;
 import expert.nbt.nutrimind.config.TestConfig;
 import java.util.regex.Pattern;
 
@@ -25,7 +26,13 @@ public final class WaitingForPlayersPage extends BasePage {
                 .filter(new Locator.FilterOptions().setVisible(true));
     }
 
-    @Override public void waitUntilReady() {
+    public ShareTheGameModal openShareTheGame() {
+        page().getByRole(AriaRole.BUTTON,
+                new Page.GetByRoleOptions().setName("Share the game").setExact(true)).click();
+        return ready(new ShareTheGameModal(page(), routes()));
+    }
+
+    @Override protected void waitForPageContent() {
         editDataButton().waitFor();
     }
 }

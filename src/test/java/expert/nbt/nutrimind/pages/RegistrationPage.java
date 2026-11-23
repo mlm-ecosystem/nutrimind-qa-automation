@@ -18,8 +18,7 @@ public final class RegistrationPage extends BasePage {
         return email().or(password).or(submitButton()).or(link("Google"))
                 .filter(new Locator.FilterOptions().setVisible(true));
     }
-    @Override public void waitUntilReady() {
-        page().waitForLoadState(LoadState.LOAD);
+    @Override protected void waitForPageContent() {
         email().waitFor(); submitButton().waitFor();
     }
 }

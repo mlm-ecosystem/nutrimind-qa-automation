@@ -10,6 +10,7 @@ import expert.nbt.nutrimind.pages.CreateNewGameSoloPage;
 import expert.nbt.nutrimind.pages.CreateNewGamePlayInTeamPage;
 import expert.nbt.nutrimind.pages.EditingRoomPage;
 import expert.nbt.nutrimind.pages.WaitingForPlayersPage;
+import expert.nbt.nutrimind.pages.ShareTheGameModal;
 import expert.nbt.nutrimind.support.UiAssertions;
 import io.qameta.allure.*;
 import java.nio.charset.StandardCharsets;
@@ -202,11 +203,26 @@ public final class SmokeTest extends BaseTest {
         EditingRoomPage initialEditingRoom = teamGame.createGame();
         UiAssertions.notBlank(initialEditingRoom.playerName(), "Player name is prefilled after creating the room");
         WaitingForPlayersPage gameRoom = initialEditingRoom.saveEdits();
-        UiAssertions.visible(gameRoom.editDataButton(), "Save completes and the Edit data control is displayed", 30000.0);
+        UiAssertions.visible(gameRoom.editDataButton(), "Save completes and the Edit data control is displayed");
         EditingRoomPage editingRoom = gameRoom.openEditData();
         editingRoom.clearPlayerName();
         UiAssertions.disabled(editingRoom.saveButton(), "Save is disabled when Player name is empty");
         UiAssertions.attributeContains(editingRoom.playerNameField(), "class", "mat-form-field-invalid",
                 "Player name is highlighted as invalid");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 17: Открытие модального окна Поделиться")
+    public void openShareTheGameModal(Credentials user) {
+        openLogin("EN");
+        CreateNewGamePlayInTeamPage teamGame = login().login(user).chooseTeamGame().selectOrganizer();
+        teamGame.enterGameName("Smoke17-" + UUID.randomUUID().toString().substring(0, 8));
+        teamGame.enterSecurityCode("1234");
+        teamGame.selectNumberOfPlayers(2);
+        EditingRoomPage editingRoom = teamGame.createGame();
+        WaitingForPlayersPage gameRoom = editingRoom.saveEdits();
+        ShareTheGameModal shareModal = gameRoom.openShareTheGame();
+        UiAssertions.text(shareModal.title(), "Share the game", "the Share the game modal title is displayed");
+        UiAssertions.visible(shareModal.copyButton(), "the Copy button is displayed in the Share the game modal");
+        UiAssertions.visible(shareModal.closeButton(), "the Close button is displayed in the Share the game modal");
     }
 }

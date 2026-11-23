@@ -40,9 +40,16 @@ public final class LoginPage extends BasePage {
         return page().getByText("User name and password not found. Check again!", new Page.GetByTextOptions().setExact(true))
                 .filter(new Locator.FilterOptions().setVisible(true)).first();
     }
-    public void open() { log.info("Opening login page"); page().navigate(routes().game("")); }
-    public void reload() { page().reload(); }
-    @Override public void waitUntilReady() {
+    public void open() {
+        log.info("Opening login page");
+        page().navigate(routes().game(""));
+        waitUntilReady();
+    }
+    public void reload() {
+        page().reload();
+        waitUntilReady();
+    }
+    @Override protected void waitForPageContent() {
         email().waitFor(); password().waitFor(); submitButton().waitFor();
     }
     public void selectLanguage(String language) {
@@ -77,5 +84,8 @@ public final class LoginPage extends BasePage {
         page().navigate(routes().game("step-one"));
         return ready(new ChooseGameTypePage(page(), routes(), privacy));
     }
-    public void openProtectedRoute() { page().navigate(routes().game("step-one")); }
+    public void openProtectedRoute() {
+        page().navigate(routes().game("step-one"));
+        waitUntilReady();
+    }
 }

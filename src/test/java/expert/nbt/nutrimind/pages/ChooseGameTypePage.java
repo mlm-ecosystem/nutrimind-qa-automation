@@ -27,7 +27,7 @@ public final class ChooseGameTypePage extends BasePage {
     }
     public Locator rulesLink() { return link("Rules of the game"); }
     public Locator logoutDialog() { return page().getByRole(AriaRole.DIALOG); }
-    @Override public void waitUntilReady() { heading().waitFor(); }
+    @Override protected void waitForPageContent() { heading().waitFor(); }
 
     public APIResponse openRules() {
         rulesOrigin = page().url();

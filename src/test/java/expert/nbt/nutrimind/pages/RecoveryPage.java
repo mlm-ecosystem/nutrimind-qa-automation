@@ -16,13 +16,12 @@ public final class RecoveryPage extends BasePage {
     public Locator formControls() {
         return email().or(button("Отправить")).filter(new Locator.FilterOptions().setVisible(true));
     }
-    @Override public void waitUntilReady() {
-        page().waitForLoadState(LoadState.LOAD);
+    @Override protected void waitForPageContent() {
         resetLink().waitFor();
     }
     public void openPasswordReset() {
         resetLink().click();
-        page().waitForLoadState(LoadState.LOAD);
+        waitForPageLoad();
         email().waitFor();
     }
 }
