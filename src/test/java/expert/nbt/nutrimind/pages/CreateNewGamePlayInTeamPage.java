@@ -21,6 +21,12 @@ public final class CreateNewGamePlayInTeamPage extends BasePage {
         return this;
     }
 
+    public JoinTheGamePage selectGuest() {
+        page().getByText(Pattern.compile("^Guest$", Pattern.CASE_INSENSITIVE))
+                .filter(new Locator.FilterOptions().setVisible(true)).locator("xpath=..").click();
+        return ready(new JoinTheGamePage(page(), routes(), privacy));
+    }
+
     public Locator gameName() {
         return page().getByRole(com.microsoft.playwright.options.AriaRole.TEXTBOX,
                 new Page.GetByRoleOptions().setName("Enter game name").setExact(true));

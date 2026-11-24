@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import static org.testng.Assert.*;
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public final class UiAssertions {
     private UiAssertions() { }
@@ -83,11 +84,19 @@ public final class UiAssertions {
     }
 
     public static void enabled(Locator locator, String expected) {
-        assertTrue(locator.isEnabled(), "Expected: " + expected + ". Actual: the control is disabled.");
+        try {
+            assertThat(locator).isEnabled();
+        } catch (AssertionError error) {
+            fail("Expected: " + expected + ". Actual: the control is disabled.");
+        }
     }
 
     public static void disabled(Locator locator, String expected) {
-        assertFalse(locator.isEnabled(), "Expected: " + expected + ". Actual: the control is enabled.");
+        try {
+            assertThat(locator).isDisabled();
+        } catch (AssertionError error) {
+            fail("Expected: " + expected + ". Actual: the control is enabled.");
+        }
     }
 
     private static String normalize(String text) {

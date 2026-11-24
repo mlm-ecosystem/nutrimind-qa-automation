@@ -11,6 +11,7 @@ import expert.nbt.nutrimind.pages.CreateNewGamePlayInTeamPage;
 import expert.nbt.nutrimind.pages.EditingRoomPage;
 import expert.nbt.nutrimind.pages.WaitingForPlayersPage;
 import expert.nbt.nutrimind.pages.ShareTheGameModal;
+import expert.nbt.nutrimind.pages.JoinTheGamePage;
 import expert.nbt.nutrimind.support.UiAssertions;
 import io.qameta.allure.*;
 import java.nio.charset.StandardCharsets;
@@ -245,5 +246,26 @@ public final class SmokeTest extends BaseTest {
         UiAssertions.visible(shareModal.closeButton(), "the Close button is displayed in the Share the game modal");
         WaitingForPlayersPage waitingForPlayers = shareModal.close();
         UiAssertions.visible(waitingForPlayers.editDataButton(), "the player waiting page is displayed after closing the modal");
+    }
+
+    @Test(groups = "smoke", dataProvider = "secondaryUser", description = "Smoke - 19: Вход в защищённую комнату с корректным кодом")
+    public void joinProtectedRoomWithCorrectCode(Credentials user) {
+        openLogin("EN");
+        JoinTheGamePage games = login().login(user).chooseTeamGame().selectGuest();
+        UiAssertions.disabled(games.joinButton(), "Join is disabled until the security code is entered");
+        games.enterSecurityCode("1234");
+        EditingRoomPage room = games.joinRoom();
+        UiAssertions.url(room.page(), Pattern.compile("^https?://[^/?#]+/[^?#]*[0-9][^?#]*(?:\\?.*)?$"),
+                "the joined room ID is present in the URL");
+    }
+
+    @Test(groups = "smoke", dataProvider = "secondaryUser", description = "Smoke - 20: Вход в защищённую комнату с некорректным кодом")
+    public void rejectIncorrectProtectedRoomCode(Credentials user) {
+        openLogin("EN");
+        JoinTheGamePage games = login().login(user).chooseTeamGame().selectGuest();
+        UiAssertions.disabled(games.joinButton(), "Join is disabled until the security code is entered");
+        games.enterSecurityCode("0000");
+        games.joinButton().click();
+        UiAssertions.visible(games.incorrectPasswordDialog(), "an incorrect-room-password dialog is displayed");
     }
 }
