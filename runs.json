@@ -1,5 +1,22 @@
 [
   {
+    "key": "45376692993-1",
+    "number": 21,
+    "attempt": 1,
+    "commit": "21b5e5f",
+    "branch": "main",
+    "date": "2026-11-24T10:38:24Z",
+    "actions_url": "https://github.com/mlm-ecosystem/nutrimind-qa-automation/actions/runs/45376692993",
+    "statistic": {
+      "failed": 1,
+      "broken": 0,
+      "skipped": 0,
+      "passed": 19,
+      "unknown": 0,
+      "total": 20
+    }
+  },
+  {
     "key": "45370529776-1",
     "number": 20,
     "attempt": 1,
