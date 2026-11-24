@@ -66,14 +66,73 @@ public final class ChooseGameTypePage extends BasePage {
         waitUntilReady();
     }
     public void openLogoutDialog() {
-        language = page().getByRole(AriaRole.BUTTON,
-                new Page.GetByRoleOptions().setName(Pattern.compile("^(UK|EN)$", Pattern.CASE_INSENSITIVE)))
-                .innerText().trim().toUpperCase(Locale.ROOT);
-        page().getByRole(AriaRole.BUTTON).filter(new Locator.FilterOptions()
-                .setHas(page().getByText("menu", new Page.GetByTextOptions().setExact(true)))).click();
+        language = currentLanguage();
+        openNavigationMenu();
         page().getByRole(AriaRole.MENUITEM, new Page.GetByRoleOptions()
                 .setName(language.equals("EN") ? "Log out" : "Вийти із системи").setExact(true)).click();
         logoutDialog().waitFor();
+    }
+
+    public void openNavigationMenu() {
+        language = currentLanguage();
+        page().getByRole(AriaRole.BUTTON).filter(new Locator.FilterOptions()
+                .setHas(page().getByText("menu", new Page.GetByTextOptions().setExact(true)))).click();
+    }
+
+    public Locator dashboardMenuItem() {
+        return page().getByRole(AriaRole.MENUITEM, new Page.GetByRoleOptions()
+                .setName(language.equals("EN") ? "Dashboard" : "Особистий кабінет").setExact(true));
+    }
+
+    public DashboardPage openDashboard() {
+        dashboardMenuItem().click();
+        return ready(new DashboardPage(page(), routes()));
+    }
+
+    public Locator personalReferralLinkMenuItem() {
+        return page().getByRole(AriaRole.MENUITEM, new Page.GetByRoleOptions()
+                .setName("Personal referral link").setExact(true));
+    }
+
+    public PersonalReferralLinkModal openPersonalReferralLink() {
+        personalReferralLinkMenuItem().click();
+        return ready(new PersonalReferralLinkModal(page(), routes(), privacy));
+    }
+
+    public Locator questionnairesMenuItem() {
+        return page().getByRole(AriaRole.MENUITEM, new Page.GetByRoleOptions()
+                .setName("Questionnaires").setExact(true));
+    }
+
+    public QuestionnairesModal openQuestionnaires() {
+        questionnairesMenuItem().click();
+        return ready(new QuestionnairesModal(page(), routes(), privacy));
+    }
+
+    public Locator plansMenuItem() {
+        return page().getByRole(AriaRole.MENUITEM, new Page.GetByRoleOptions()
+                .setName("Plans").setExact(true));
+    }
+
+    public PlansModal openPlans() {
+        plansMenuItem().click();
+        return ready(new PlansModal(page(), routes(), privacy));
+    }
+
+    public Locator progressMenuItem() {
+        return page().getByRole(AriaRole.MENUITEM, new Page.GetByRoleOptions()
+                .setName("Progress").setExact(true));
+    }
+
+    public ProgressModal openProgress() {
+        progressMenuItem().click();
+        return ready(new ProgressModal(page(), routes(), privacy));
+    }
+
+    private String currentLanguage() {
+        return page().getByRole(AriaRole.BUTTON,
+                new Page.GetByRoleOptions().setName(Pattern.compile("^(UK|EN)$", Pattern.CASE_INSENSITIVE)))
+                .innerText().trim().toUpperCase(Locale.ROOT);
     }
     public LoginPage confirmLogout() {
         logoutDialog().getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions()

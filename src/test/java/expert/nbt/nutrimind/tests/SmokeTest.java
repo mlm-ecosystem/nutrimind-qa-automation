@@ -12,6 +12,11 @@ import expert.nbt.nutrimind.pages.EditingRoomPage;
 import expert.nbt.nutrimind.pages.WaitingForPlayersPage;
 import expert.nbt.nutrimind.pages.ShareTheGameModal;
 import expert.nbt.nutrimind.pages.JoinTheGamePage;
+import expert.nbt.nutrimind.pages.DashboardPage;
+import expert.nbt.nutrimind.pages.PersonalReferralLinkModal;
+import expert.nbt.nutrimind.pages.QuestionnairesModal;
+import expert.nbt.nutrimind.pages.PlansModal;
+import expert.nbt.nutrimind.pages.ProgressModal;
 import expert.nbt.nutrimind.support.UiAssertions;
 import io.qameta.allure.*;
 import java.nio.charset.StandardCharsets;
@@ -289,5 +294,99 @@ public final class SmokeTest extends BaseTest {
         UiAssertions.url(room.page(), Pattern.compile("^https?://[^/?#]+/[^?#]*[0-9][^?#]*(?:\\?.*)?$"),
                 "the created solo QUEST room ID is present in the URL");
         UiAssertions.text(room.heading(), "Editing a room", "the Editing a room page is displayed for QUEST");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 23: Открытие страницы «Личный кабинет»")
+    public void openPersonalAccount(Credentials user) {
+        openLogin("EN");
+        ChooseGameTypePage game = login().login(user);
+        game.openNavigationMenu();
+        UiAssertions.visible(game.dashboardMenuItem(), "the Dashboard item is displayed in the navigation menu");
+        DashboardPage account = game.openDashboard();
+        UiAssertions.text(account.heading(), "Dashboard", "the Dashboard page heading is displayed");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 24: Открытие модального окна «Личная реферальная ссылка»")
+    public void openPersonalReferralLinkModal(Credentials user) {
+        openLogin("EN");
+        ChooseGameTypePage game = login().login(user);
+        game.openNavigationMenu();
+        PersonalReferralLinkModal referralLink = game.openPersonalReferralLink();
+        UiAssertions.text(referralLink.title(), "Personal referral link", "the Personal referral link modal title is displayed");
+        UiAssertions.visible(referralLink.internalLink(), "the Internal link field is displayed");
+        UiAssertions.visible(referralLink.closeButton(), "the Close button is displayed in the modal");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 25: Закрытие модального окна «Личная реферальная ссылка»")
+    public void closePersonalReferralLinkModal(Credentials user) {
+        openLogin("EN");
+        ChooseGameTypePage game = login().login(user);
+        game.openNavigationMenu();
+        PersonalReferralLinkModal referralLink = game.openPersonalReferralLink();
+        ChooseGameTypePage gameTypes = referralLink.close();
+        UiAssertions.text(gameTypes.heading(), "Choose a game type", "the game-type selection page remains displayed after closing the modal");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 26: Открытие модального окна «Опросники»")
+    public void openQuestionnairesModal(Credentials user) {
+        openLogin("EN");
+        ChooseGameTypePage game = login().login(user);
+        game.openNavigationMenu();
+        QuestionnairesModal questionnaires = game.openQuestionnaires();
+        UiAssertions.text(questionnaires.title(), "List of Questionnaires", "the List of Questionnaires modal title is displayed");
+        UiAssertions.visible(questionnaires.copyButton(), "a questionnaire copy button is displayed");
+        UiAssertions.visible(questionnaires.closeButton(), "the Close button is displayed in the modal");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 27: Закрытие модального окна «Опросники»")
+    public void closeQuestionnairesModal(Credentials user) {
+        openLogin("EN");
+        ChooseGameTypePage game = login().login(user);
+        game.openNavigationMenu();
+        QuestionnairesModal questionnaires = game.openQuestionnaires();
+        ChooseGameTypePage gameTypes = questionnaires.close();
+        UiAssertions.text(gameTypes.heading(), "Choose a game type", "the game-type selection page remains displayed after closing the modal");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 28: Открытие модального окна «Тарифы»")
+    public void openPlansModal(Credentials user) {
+        openLogin("EN");
+        ChooseGameTypePage game = login().login(user);
+        game.openNavigationMenu();
+        PlansModal plans = game.openPlans();
+        UiAssertions.text(plans.title(), "Plans", "the Plans modal title is displayed");
+        UiAssertions.count(plans.cards(), 4, "four plan cards are displayed");
+        UiAssertions.count(plans.chooseButtons(), 4, "each plan card has a Choose button");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 29: Закрытие модального окна «Тарифы»")
+    public void closePlansModal(Credentials user) {
+        openLogin("EN");
+        ChooseGameTypePage game = login().login(user);
+        game.openNavigationMenu();
+        PlansModal plans = game.openPlans();
+        ChooseGameTypePage gameTypes = plans.close();
+        UiAssertions.text(gameTypes.heading(), "Choose a game type", "the game-type selection page remains displayed after closing the modal");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 30: Открытие модального окна «Успеваемость»")
+    public void openProgressModal(Credentials user) {
+        openLogin("EN");
+        ChooseGameTypePage game = login().login(user);
+        game.openNavigationMenu();
+        ProgressModal progress = game.openProgress();
+        UiAssertions.text(progress.title(), "Progress", "the Progress modal title is displayed");
+        UiAssertions.visible(progress.idColumn(), "the ID progress column is displayed");
+        UiAssertions.visible(progress.nameColumn(), "the Name progress column is displayed");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 31: Закрытие модального окна «Успеваемость»")
+    public void closeProgressModal(Credentials user) {
+        openLogin("EN");
+        ChooseGameTypePage game = login().login(user);
+        game.openNavigationMenu();
+        ProgressModal progress = game.openProgress();
+        ChooseGameTypePage gameTypes = progress.continueToGameTypes();
+        UiAssertions.text(gameTypes.heading(), "Choose a game type", "the game-type selection page remains displayed after continuing");
     }
 }
