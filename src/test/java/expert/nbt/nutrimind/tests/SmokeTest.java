@@ -268,4 +268,26 @@ public final class SmokeTest extends BaseTest {
         games.joinButton().click();
         UiAssertions.visible(games.incorrectPasswordDialog(), "an incorrect-room-password dialog is displayed");
     }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 21: Создание одиночной ROLE комнаты")
+    public void createSoloRoleRoom(Credentials user) {
+        openLogin("EN");
+        CreateNewGameSoloPage soloGame = login().login(user).chooseSoloGame();
+        soloGame.selectGameType("ROLE");
+        EditingRoomPage room = soloGame.createGame();
+        UiAssertions.url(room.page(), Pattern.compile("^https?://[^/?#]+/[^?#]*[0-9][^?#]*(?:\\?.*)?$"),
+                "the created solo ROLE room ID is present in the URL");
+        UiAssertions.text(room.heading(), "Editing a room", "the Editing a room page is displayed for ROLE");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 22: Создание одиночной QUEST комнаты")
+    public void createSoloQuestRoom(Credentials user) {
+        openLogin("EN");
+        CreateNewGameSoloPage soloGame = login().login(user).chooseSoloGame();
+        soloGame.selectGameType("QUEST");
+        EditingRoomPage room = soloGame.createGame();
+        UiAssertions.url(room.page(), Pattern.compile("^https?://[^/?#]+/[^?#]*[0-9][^?#]*(?:\\?.*)?$"),
+                "the created solo QUEST room ID is present in the URL");
+        UiAssertions.text(room.heading(), "Editing a room", "the Editing a room page is displayed for QUEST");
+    }
 }

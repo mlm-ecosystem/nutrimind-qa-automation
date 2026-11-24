@@ -20,6 +20,11 @@ public final class EditingRoomPage extends BasePage {
                 new Page.GetByRoleOptions().setName("Player name").setExact(true));
     }
 
+    public Locator heading() {
+        return page().getByText(Pattern.compile("^Editing a room$", Pattern.CASE_INSENSITIVE))
+                .filter(new Locator.FilterOptions().setVisible(true));
+    }
+
     public Locator playerNameField() {
         return playerName().locator("xpath=ancestor::mat-form-field");
     }
@@ -62,8 +67,7 @@ public final class EditingRoomPage extends BasePage {
     }
 
     @Override protected void waitForPageContent() {
-        page().getByText(Pattern.compile("^Editing a room$", Pattern.CASE_INSENSITIVE))
-                .filter(new Locator.FilterOptions().setVisible(true)).waitFor();
+        heading().waitFor();
         playerName().waitFor();
         cancelButton().waitFor();
         saveButton().waitFor();

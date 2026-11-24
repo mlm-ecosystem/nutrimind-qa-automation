@@ -8,8 +8,11 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("resource")
 public final class CreateNewGameSoloPage extends BasePage {
-    public CreateNewGameSoloPage(Page page, TestConfig routes) {
+    private final Runnable privacy;
+
+    public CreateNewGameSoloPage(Page page, TestConfig routes, Runnable privacy) {
         super(page, routes);
+        this.privacy = privacy;
     }
     private Locator gameType(String type) {
         return page().getByText(Pattern.compile("^" + type + "$", Pattern.CASE_INSENSITIVE)).locator("xpath=..");
@@ -27,4 +30,10 @@ public final class CreateNewGameSoloPage extends BasePage {
         page().getByText(Pattern.compile("^QUEST$", Pattern.CASE_INSENSITIVE)).waitFor();
     }
     public void selectGameType(String type) { selectButton(type).click(); }
+
+    public EditingRoomPage createGame() {
+        createButton().click();
+        page().waitForCondition(() -> !page().url().contains("/create-game;view=one-player"));
+        return ready(new EditingRoomPage(page(), routes(), privacy));
+    }
 }
