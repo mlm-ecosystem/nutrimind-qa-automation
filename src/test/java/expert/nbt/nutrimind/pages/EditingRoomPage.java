@@ -41,12 +41,13 @@ public final class EditingRoomPage extends BasePage {
 
     public void enterPlayerName(String name) {
         playerName().fill("");
-        playerName().pressSequentially(name);
+        playerName().pressSequentially(name, new Locator.PressSequentiallyOptions().setDelay(400));
         playerName().press("Tab");
     }
 
     public WaitingForPlayersPage saveEdits() {
         waitUntilReady();
+        page().waitForCondition(() -> !playerName().inputValue().isBlank() && saveButton().isEnabled());
         saveButton().click();
         return new WaitingForPlayersPage(page(), routes(), privacy);
     }
@@ -66,6 +67,5 @@ public final class EditingRoomPage extends BasePage {
         playerName().waitFor();
         cancelButton().waitFor();
         saveButton().waitFor();
-        page().waitForCondition(() -> !playerName().inputValue().isBlank() && saveButton().isEnabled());
     }
 }

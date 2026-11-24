@@ -28,6 +28,9 @@ public final class SmokeTest extends BaseTest {
     @DataProvider(name = "primaryUser")
     public Object[][] primaryUser() { return new Object[][]{{config.primary()}}; }
 
+    @DataProvider(name = "secondaryUser")
+    public Object[][] secondaryUser() { return new Object[][]{{config.secondary()}}; }
+
     @Test(groups = "smoke", description = "Smoke - 1: Смена языка интерфейса")
     public void changeInterfaceLanguage() {
         String[][] translations = {
@@ -228,7 +231,7 @@ public final class SmokeTest extends BaseTest {
         UiAssertions.visible(shareModal.closeButton(), "the Close button is displayed in the Share the game modal");
     }
 
-    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 18: Закрытие модального окна Поделиться кнопкой Закрыть")
+    @Test(groups = "smoke", dataProvider = "secondaryUser", description = "Smoke - 18: Закрытие модального окна Поделиться кнопкой Закрыть")
     public void closeShareTheGameModal(Credentials user) {
         openLogin("EN");
         CreateNewGamePlayInTeamPage teamGame = login().login(user).chooseTeamGame().selectOrganizer();
@@ -236,7 +239,7 @@ public final class SmokeTest extends BaseTest {
         teamGame.enterSecurityCode("1234");
         teamGame.selectNumberOfPlayers(2);
         EditingRoomPage editingRoom = teamGame.createGame();
-        editingRoom.enterPlayerName("Player One");
+        editingRoom.enterPlayerName("Player Two");
         WaitingForPlayersPage gameRoom = editingRoom.saveEdits();
         ShareTheGameModal shareModal = gameRoom.openShareTheGame();
         UiAssertions.visible(shareModal.closeButton(), "the Close button is displayed in the Share the game modal");

@@ -73,6 +73,12 @@ public final class TestConfig {
     public boolean headless() { return headless; }
     public double timeout() { return timeout; }
     public Credentials primary() { return users.get(0); }
+    public Credentials secondary() {
+        if (users.size() < 2) {
+            throw new IllegalStateException("Configure TEST_EMAIL2 and TEST_PASSWORD2 for Smoke - 18");
+        }
+        return users.get(1);
+    }
     public List<Credentials> users() { return users; }
     public boolean hasGoogleAuthenticationState() { return !googleSessionStorage.isBlank(); }
     public Path googleStorageState() { return googleStorageState; }

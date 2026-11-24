@@ -56,14 +56,14 @@ The **NutriMind UI** configuration runs tests with a visible browser window.
 ## Credentials and configuration
 
 Provide `TEST_EMAIL` and `TEST_PASSWORD` for the primary account. Add `TEST_EMAIL2` and `TEST_PASSWORD2` 
-together to configure the secondary account for future two-player game tests. Actual values must not be committed.
+together to configure the secondary account for Smoke - 18 and two-player game tests. Actual values must not be committed.
 Smoke - 9 uses exported Google authentication state rather than entering Google credentials during CI.
 
 Local execution also reads `.secrets/users.properties` using those environment-variable names as property keys. 
 This directory is ignored by Git and the local file has owner-only permissions. Environment variables take precedence 
 over the file. Keep secrets out of Maven command-line arguments.
 
-Optional overrides: `BASE_URL`, `HEADLESS`, and `TEST_TIMEOUT`. Authentication and navigation scenarios use only the primary account.
+Optional overrides: `BASE_URL`, `HEADLESS`, and `TEST_TIMEOUT`. Other authentication and navigation scenarios use the primary account.
 
 ### One-time Google session export
 
