@@ -1,1 +1,1 @@
-{"reportName":"NutriMind #23.1","testRuns":[],"statistic":{"failed":1,"broken":0,"skipped":0,"passed":30,"unknown":0,"total":31},"time":{"start":1795559968728,"stop":1795560240476,"duration":271748,"minDuration":2401,"maxDuration":36478,"sumDuration":325635}}
+{"reportName":"NutriMind #24.1","testRuns":[],"statistic":{"failed":2,"broken":4,"skipped":0,"passed":28,"unknown":0,"total":34},"time":{"start":1795609572374,"stop":1795610005082,"duration":432708,"minDuration":2685,"maxDuration":57994,"sumDuration":556829}}
