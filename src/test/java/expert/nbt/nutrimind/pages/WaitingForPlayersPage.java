@@ -32,6 +32,17 @@ public final class WaitingForPlayersPage extends BasePage {
         return ready(new ShareTheGameModal(page(), routes(), privacy));
     }
 
+    public Locator startTheGameButton() {
+        return page().getByRole(AriaRole.BUTTON,
+                new Page.GetByRoleOptions().setName("Start the game").setExact(true));
+    }
+
+    public GameBoardPage startTheGame() {
+        waitUntilReady();
+        startTheGameButton().click();
+        return ready(new GameBoardPage(page(), routes()));
+    }
+
     @Override protected void waitForPageContent() {
         editDataButton().waitFor();
     }

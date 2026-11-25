@@ -34,6 +34,11 @@ public final class EditingRoomPage extends BasePage {
                 new Page.GetByRoleOptions().setName("Save").setExact(true));
     }
 
+    public Locator quest(String name) {
+        return page().getByText(name, new Page.GetByTextOptions().setExact(true))
+                .filter(new Locator.FilterOptions().setVisible(true));
+    }
+
     private Locator cancelButton() {
         return page().getByText(Pattern.compile("^Cancel$", Pattern.CASE_INSENSITIVE))
                 .filter(new Locator.FilterOptions().setVisible(true));
@@ -48,6 +53,10 @@ public final class EditingRoomPage extends BasePage {
         playerName().fill("");
         playerName().pressSequentially(name, new Locator.PressSequentiallyOptions().setDelay(400));
         playerName().press("Tab");
+    }
+
+    public void selectQuest(String name) {
+        quest(name).click();
     }
 
     public WaitingForPlayersPage saveEdits() {

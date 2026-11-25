@@ -17,6 +17,8 @@ import expert.nbt.nutrimind.pages.PersonalReferralLinkModal;
 import expert.nbt.nutrimind.pages.QuestionnairesModal;
 import expert.nbt.nutrimind.pages.PlansModal;
 import expert.nbt.nutrimind.pages.ProgressModal;
+import expert.nbt.nutrimind.pages.GameBoardPage;
+import expert.nbt.nutrimind.pages.GoalDescriptionModal;
 import expert.nbt.nutrimind.support.UiAssertions;
 import io.qameta.allure.*;
 import java.nio.charset.StandardCharsets;
@@ -388,5 +390,51 @@ public final class SmokeTest extends BaseTest {
         ProgressModal progress = game.openProgress();
         ChooseGameTypePage gameTypes = progress.continueToGameTypes();
         UiAssertions.text(gameTypes.heading(), "Choose a game type", "the game-type selection page remains displayed after continuing");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 32: Отображение ожидания хода в одиночной игре")
+    public void showWaitingForTurnInSoloGame(Credentials user) {
+        openLogin("EN");
+        CreateNewGameSoloPage soloGame = login().login(user).chooseSoloGame();
+        soloGame.selectGameType("QUEST");
+        EditingRoomPage editingRoom = soloGame.createGame();
+        editingRoom.selectQuest("Stress and adaptation");
+        editingRoom.enterPlayerName("Player One");
+        WaitingForPlayersPage preparingForGame = editingRoom.saveEdits();
+        GameBoardPage gameBoard = preparingForGame.startTheGame();
+        UiAssertions.visible(gameBoard.waitingForTurn(), "the Waiting for your turn block is displayed");
+        UiAssertions.enabled(gameBoard.makeAMoveButton(), "Make a move is enabled for the current player");
+    }
+
+    @Test(groups = "smoke", dataProvider = "primaryUser", description = "Smoke - 33: Открытие модального окна Описание цели на экране игры")
+    public void openGoalDescriptionModal(Credentials user) {
+        openLogin("EN");
+        CreateNewGameSoloPage soloGame = login().login(user).chooseSoloGame();
+        soloGame.selectGameType("QUEST");
+        EditingRoomPage editingRoom = soloGame.createGame();
+        editingRoom.selectQuest("Stress and adaptation");
+        editingRoom.enterPlayerName("Player One");
+        WaitingForPlayersPage preparingForGame = editingRoom.saveEdits();
+        GameBoardPage gameBoard = preparingForGame.startTheGame();
+        GoalDescriptionModal goalDescription = gameBoard.openGoalDescription();
+        UiAssertions.text(goalDescription.title(), "Goal description", "the Goal description modal title is displayed");
+        UiAssertions.visible(goalDescription.description(), "the goal description text is displayed");
+        UiAssertions.visible(goalDescription.gotItButton(), "the Got it button is displayed");
+    }
+
+    @Test(groups = "smoke", dataProvider = "secondaryUser", description = "Smoke - 34: Закрытие модального окна Описание цели на экране игры")
+    public void closeGoalDescriptionModal(Credentials user) {
+        openLogin("EN");
+        CreateNewGameSoloPage soloGame = login().login(user).chooseSoloGame();
+        soloGame.selectGameType("QUEST");
+        EditingRoomPage editingRoom = soloGame.createGame();
+        editingRoom.selectQuest("Stress and adaptation");
+        editingRoom.enterPlayerName("Player Two");
+        WaitingForPlayersPage preparingForGame = editingRoom.saveEdits();
+        GameBoardPage gameBoard = preparingForGame.startTheGame();
+        GoalDescriptionModal goalDescription = gameBoard.openGoalDescription();
+        GameBoardPage gameAfterClosingModal = goalDescription.close();
+        UiAssertions.visible(gameAfterClosingModal.waitingForTurn(), "the game board is displayed after closing the modal");
+        UiAssertions.enabled(gameAfterClosingModal.makeAMoveButton(), "Make a move remains enabled after closing the modal");
     }
 }
